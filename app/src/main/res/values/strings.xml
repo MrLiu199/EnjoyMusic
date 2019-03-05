@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">EnjoyMusic</string>
+    <string name="subtitle_format">%1$d musics</string>
+    <string name="delete_music">删除%s？</string>
+    <string name="delete">删除</string>
+    <string name="cancel">取消</string>
+    <string name="share">分享</string>
+</resources>

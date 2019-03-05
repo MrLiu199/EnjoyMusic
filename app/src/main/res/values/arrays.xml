@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="local_music_dialog">
+        <item>分享</item>
+        <item>设为铃声</item>
+        <item>查看歌曲信息</item>
+        <item>删除</item>
+    </string-array>
+</resources>
