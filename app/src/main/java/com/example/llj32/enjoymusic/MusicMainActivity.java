@@ -45,17 +45,21 @@ public class MusicMainActivity extends AppCompatActivity {
     private void switchFragment() {
         isLocalListShown = !isLocalListShown;
         Fragment fragment;
+        int resId;
         if (isLocalListShown) {
             if (mLocalMusicFragment == null) {
                 mLocalMusicFragment = new LocalMusicFragment();
             }
             fragment = mLocalMusicFragment;
+            resId = R.drawable.ic_play_bar_btn_playlist;
         } else {
             if (mPlayListFragment == null) {
                 mPlayListFragment = new PlayListFragment();
             }
             fragment = mPlayListFragment;
+            resId = R.drawable.ic_play_bar_btn_locallist;
         }
+        vPlayBarPlaylist.setImageResource(resId);
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_container, fragment)
                 .commit();

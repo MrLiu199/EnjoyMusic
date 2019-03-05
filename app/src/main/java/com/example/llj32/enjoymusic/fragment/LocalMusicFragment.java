@@ -8,8 +8,10 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.view.*;
 import com.example.llj32.enjoymusic.R;
+import com.example.llj32.enjoymusic.SearchMusicActivity;
 import com.example.llj32.enjoymusic.adapter.PlaylistAdapter;
 import com.example.llj32.enjoymusic.model.Music;
 import com.example.llj32.enjoymusic.service.AudioPlayer;
@@ -21,6 +23,7 @@ import java.util.List;
 
 //本地音乐列表
 public class LocalMusicFragment extends Fragment implements OnPlayerEventListener {
+    private SearchView mSearchView;
     private RecyclerView mMusicRecyclerView;
     private List<Music> musicList;
     private PlaylistAdapter mPlaylistAdapter;
@@ -37,7 +40,8 @@ public class LocalMusicFragment extends Fragment implements OnPlayerEventListene
         View view = inflater.inflate(R.layout.fragment_music_list, container, false);
         getActivity().setTitle("本地音乐");
 
-        mMusicRecyclerView = (RecyclerView) view
+        mSearchView = view.findViewById(R.id.music_search_view);
+        mMusicRecyclerView = view
                 .findViewById(R.id.music_recycler_view);
         mMusicRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         musicList = MusicUtils.scanMusic(getActivity());
@@ -69,6 +73,29 @@ public class LocalMusicFragment extends Fragment implements OnPlayerEventListene
             dialog.show();
         });
         mMusicRecyclerView.setAdapter(mPlaylistAdapter);
+
+        // 设置搜索文本监听
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            // 当点击搜索按钮时触发该方法
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            // 当搜索内容改变时触发该方法
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                mPlaylistAdapter.getFilter().filter(newText);
+//                if (!TextUtils.isEmpty(newText)) {
+//                    mListView.setFilterText(newText);
+//                } else {
+//                    mListView.clearTextFilter();
+//                }
+                return false;
+            }
+        });
+
+
         return view;
     }
 
@@ -129,7 +156,7 @@ public class LocalMusicFragment extends Fragment implements OnPlayerEventListene
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.fragment_music_list, menu);
+        inflater.inflate(R.menu.menu_local_music_list, menu);
 
         int crimeCount = musicList.size();
         String subtitle = getString(R.string.subtitle_format, crimeCount);
@@ -139,17 +166,9 @@ public class LocalMusicFragment extends Fragment implements OnPlayerEventListene
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_item_new_crime:
-//                Crime crime = new Crime();
-//                CrimeLab.get(getActivity()).addCrime(crime);
-//                Intent intent = CrimePagerActivity
-//                        .newIntent(getActivity(), crime.getId());
-//                startActivity(intent);
-                return true;
-            case R.id.menu_item_show_subtitle:
-//                mSubtitleVisible = !mSubtitleVisible;
-//                getActivity().invalidateOptionsMenu();
-//                updateSubtitle();
+            case R.id.menu_item_add_music:
+                Intent intent = SearchMusicActivity.newIntent(getActivity());
+                startActivity(intent);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

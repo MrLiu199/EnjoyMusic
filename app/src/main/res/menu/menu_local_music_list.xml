@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
+    <!--<item
         android:id="@+id/menu_item_new_crime"
         android:title="搜索本地音乐"
-        app:showAsAction="never" />
+        app:showAsAction="never" />-->
 
     <item
-        android:id="@+id/menu_item_show_subtitle"
-        android:icon="@android:drawable/ic_menu_add"
+        android:id="@+id/menu_item_add_music"
+        android:icon="@drawable/ic_music_search_add"
         android:title="添加网络音乐"
-        app:showAsAction="never" />
+        app:showAsAction="ifRoom" />
 </menu>

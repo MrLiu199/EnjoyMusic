@@ -1,0 +1,10 @@
+<!-- drawable/music_note_plus.xml -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportHeight="24"
+    android:viewportWidth="24">
+    <path
+        android:fillColor="#FFF"
+        android:pathData="M9,3V12.26C8.5,12.09 8,12 7.5,12C5,12 3,14 3,16.5C3,19 5,21 7.5,21C10,21 12,19 12,16.5V6H16V3H9M17,9V12H14V14H17V17H19V14H22V12H19V9H17Z" />
+</vector>

@@ -29,10 +29,10 @@ public class PlayListFragment extends Fragment implements OnPlayerEventListener 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_music_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_play_list, container, false);
         getActivity().setTitle("播放列表");
 
-        mMusicRecyclerView = (RecyclerView) view
+        mMusicRecyclerView = view
                 .findViewById(R.id.music_recycler_view);
         mMusicRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mPlaylistAdapter = new PlaylistAdapter(AudioPlayer.get().getMusicList());
@@ -65,6 +65,27 @@ public class PlayListFragment extends Fragment implements OnPlayerEventListener 
         String subtitle = getString(R.string.subtitle_format, crimeCount);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setSubtitle(subtitle);
     }
+
+//    @Override
+//    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+//        super.onCreateOptionsMenu(menu, inflater);
+//        inflater.inflate(R.menu.menu_search_music, menu);
+//        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+//        searchView.setMaxWidth(Integer.MAX_VALUE);
+//        searchView.onActionViewExpanded();
+//        searchView.setQueryHint(getString(R.string.search_tips));
+////        searchView.setOnQueryTextListener(this);
+//        searchView.setSubmitButtonEnabled(true);
+//        try {
+//            Field field = searchView.getClass().getDeclaredField("mGoButton");
+//            field.setAccessible(true);
+//            ImageView mGoButton = (ImageView) field.get(searchView);
+//            mGoButton.setImageResource(R.drawable.ic_menu_search);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+////        return super.onCreateOptionsMenu(menu);
+//    }
 
     @Override
     public void onChange(Music music) {
