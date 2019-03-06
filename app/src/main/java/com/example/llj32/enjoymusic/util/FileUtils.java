@@ -11,13 +11,19 @@ import java.util.regex.Pattern;
 
 public class FileUtils {
     private static final String MP3 = ".mp3";
+    public static final String EnjoyMusic = "EnjoyMusic";
 
     private static String getAppDir() {
-        return Environment.getExternalStorageDirectory() + "/EnjoyMusic";
+        return Environment.getExternalStorageDirectory() + "/" + EnjoyMusic;
     }
 
     public static String getMusicDir() {
         String dir = getAppDir() + "/Music/";
+        return mkdirs(dir);
+    }
+
+    public static String getRelativeMusicDir() {
+        String dir = EnjoyMusic + "/Music/";
         return mkdirs(dir);
     }
 

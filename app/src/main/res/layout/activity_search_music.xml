@@ -24,18 +24,20 @@
             android:id="@+id/tv_loading"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:gravity="center"
             android:text="加载中..."
             android:textColor="@color/colorPrimary"
-            android:textSize="@dimen/text_size_common"
+            android:textSize="@dimen/text_size_large"
             android:visibility="gone" />
 
         <TextView
             android:id="@+id/tv_load_fail"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:gravity="center"
             android:text="Sorry，加载失败"
             android:textColor="@color/colorPrimary"
-            android:textSize="@dimen/text_size_common"
+            android:textSize="@dimen/text_size_large"
             android:visibility="gone" />
     </FrameLayout>
 </LinearLayout>

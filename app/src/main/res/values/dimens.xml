@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="text_size_common">16sp</dimen>
+    <dimen name="text_size_large">20sp</dimen>
     <dimen name="play_bar_height">57dp</dimen>
     <dimen name="divider_height">0.5dp</dimen>
 </resources>

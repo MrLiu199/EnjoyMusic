@@ -3,12 +3,15 @@ package com.example.llj32.enjoymusic.fragment;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.*;
 import com.example.llj32.enjoymusic.R;
 import com.example.llj32.enjoymusic.SearchMusicActivity;
@@ -23,6 +26,7 @@ import java.util.List;
 
 //本地音乐列表
 public class LocalMusicFragment extends Fragment implements OnPlayerEventListener {
+    private static final String TAG = "LocalMusicFragment";
     private SearchView mSearchView;
     private RecyclerView mMusicRecyclerView;
     private List<Music> musicList;
@@ -44,14 +48,14 @@ public class LocalMusicFragment extends Fragment implements OnPlayerEventListene
         mMusicRecyclerView = view
                 .findViewById(R.id.music_recycler_view);
         mMusicRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        musicList = MusicUtils.scanMusic(getActivity());
+        musicList = MusicUtils.getMusics(getActivity());
         mPlaylistAdapter = new PlaylistAdapter(musicList);
         mPlaylistAdapter.setOnItemClickListener(position -> {
-            Music music = musicList.get(position);
+            Music music = mPlaylistAdapter.getFilteredList().get(position);
             AudioPlayer.get().addAndPlay(music);
         });
         mPlaylistAdapter.setOnMoreClickListener(position -> {
-            Music music = musicList.get(position);
+            Music music = mPlaylistAdapter.getFilteredList().get(position);
             AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
             dialog.setTitle(music.getTitle());
             dialog.setItems(R.array.local_music_dialog, (dialog1, which) -> {
@@ -95,7 +99,6 @@ public class LocalMusicFragment extends Fragment implements OnPlayerEventListene
             }
         });
 
-
         return view;
     }
 
@@ -117,15 +120,41 @@ public class LocalMusicFragment extends Fragment implements OnPlayerEventListene
         dialog.setMessage(msg);
         dialog.setPositiveButton(R.string.delete, (dialog1, which) -> {
             File file = new File(music.getPath());
+            Log.d(TAG, file.getPath());
             if (file.delete()) {
-                // 刷新媒体库
-                Intent intent =
-                        new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://".concat(music.getPath())));
-                getContext().sendBroadcast(intent);
+                refreshMediaFiles(music);
+                new Handler(Looper.getMainLooper()).postDelayed(this::updateMusicList, 500);
+//                updateMusicList();
+                int index;
+                if ((index = AudioPlayer.get().getMusicList().indexOf(music)) != -1) {
+                    AudioPlayer.get().delete(index);
+                }
             }
-        });
-        dialog.setNegativeButton(R.string.cancel, null);
+        }).setNegativeButton(R.string.cancel, null);
         dialog.show();
+    }
+
+    private void refreshMediaFiles(Music music) {
+        // 刷新媒体库
+        Intent intent =
+                new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://".concat(music.getPath())));
+        getContext().sendBroadcast(intent);
+    }
+
+    private void updateMusicList() {
+        musicList.clear();
+        musicList.addAll(MusicUtils.getMusics(getActivity()));
+
+        mPlaylistAdapter.getFilter().filter(mSearchView.getQuery());
+        mPlaylistAdapter.notifyDataSetChanged();
+
+        updateSubtitle();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateMusicList();
     }
 
     @Override
@@ -158,6 +187,10 @@ public class LocalMusicFragment extends Fragment implements OnPlayerEventListene
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_local_music_list, menu);
 
+        updateSubtitle();
+    }
+
+    public void updateSubtitle() {
         int crimeCount = musicList.size();
         String subtitle = getString(R.string.subtitle_format, crimeCount);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setSubtitle(subtitle);

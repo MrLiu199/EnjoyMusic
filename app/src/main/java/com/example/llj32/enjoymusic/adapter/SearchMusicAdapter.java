@@ -19,7 +19,8 @@ import java.util.List;
  */
 public class SearchMusicAdapter extends RecyclerView.Adapter<SearchMusicAdapter.ViewHolder> {
     private List<SearchMusic.Song> mData;
-    private OnMoreClickListener mListener;
+    private OnItemClickListener onItemClickListener;
+    private OnMoreClickListener onMoreClickListener;
 
     public SearchMusicAdapter(List<SearchMusic.Song> data) {
         mData = data;
@@ -36,7 +37,8 @@ public class SearchMusicAdapter extends RecyclerView.Adapter<SearchMusicAdapter.
     public void onBindViewHolder(SearchMusicAdapter.ViewHolder holder, int position) {
         holder.tvTitle.setText(mData.get(position).getSongname());
         holder.tvArtist.setText(mData.get(position).getArtistname());
-        holder.ivMore.setOnClickListener(v -> mListener.onMoreClick(position));
+        holder.itemView.setOnClickListener(v -> onItemClickListener.onItemClick(position));
+        holder.ivMore.setOnClickListener(v -> onMoreClickListener.onMoreClick(position));
         holder.vDivider.setVisibility(isShowDivider(position) ? View.VISIBLE : View.GONE);
     }
 
@@ -54,8 +56,12 @@ public class SearchMusicAdapter extends RecyclerView.Adapter<SearchMusicAdapter.
         return position != mData.size() - 1;
     }
 
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.onItemClickListener = listener;
+    }
+
     public void setOnMoreClickListener(OnMoreClickListener listener) {
-        mListener = listener;
+        this.onMoreClickListener = listener;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

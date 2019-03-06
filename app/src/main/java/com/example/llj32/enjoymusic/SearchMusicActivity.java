@@ -1,5 +1,6 @@
 package com.example.llj32.enjoymusic;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,10 +16,14 @@ import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.example.llj32.enjoymusic.adapter.SearchMusicAdapter;
+import com.example.llj32.enjoymusic.executor.DownloadMusic;
 import com.example.llj32.enjoymusic.http.HttpCallback;
 import com.example.llj32.enjoymusic.http.HttpClient;
+import com.example.llj32.enjoymusic.model.DownloadInfo;
 import com.example.llj32.enjoymusic.model.SearchMusic;
+import com.example.llj32.enjoymusic.service.AudioPlayer;
 import com.example.llj32.enjoymusic.util.FileUtils;
+import com.example.llj32.enjoymusic.util.ToastUtils;
 import com.example.llj32.enjoymusic.util.ViewUtils;
 import com.example.llj32.enjoymusic.util.ViewUtils.LoadStateEnum;
 import com.example.llj32.enjoymusic.util.viewbind.Bind;
@@ -29,6 +34,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+//搜索网络歌曲
 public class SearchMusicActivity extends AppCompatActivity {
     @Bind(R.id.rv_search_result)
     private RecyclerView mMusicRecyclerView;
@@ -54,7 +60,16 @@ public class SearchMusicActivity extends AppCompatActivity {
         mMusicRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mMusicRecyclerView.setAdapter(mAdapter);
         tvLoadFail.setText(R.string.search_empty);
-
+        mAdapter.setOnItemClickListener(position -> {
+            final SearchMusic.Song song = searchMusicList.get(position);
+            String path = FileUtils.getMusicDir() + FileUtils.getMp3FileName(song.getArtistname(), song.getSongname());
+            File file = new File(path);
+            if (file.exists()) {
+                AudioPlayer.get().addAndPlay(song);
+            } else {
+                download(song, true);
+            }
+        });
         mAdapter.setOnMoreClickListener(position -> {
             String[] items = new String[]{"下载"};
             final SearchMusic.Song song = searchMusicList.get(position);
@@ -63,31 +78,36 @@ public class SearchMusicActivity extends AppCompatActivity {
             String path = FileUtils.getMusicDir() + FileUtils.getMp3FileName(song.getArtistname(), song.getSongname());
             File file = new File(path);
             dialog.setItems(items, (dialog1, which) -> {
-                download(song);
+                if (file.exists()) {
+                    ToastUtils.show("该歌曲已下载过");
+                } else {
+                    download(song, false);
+                }
             });
             dialog.show();
         });
     }
 
-    private void download(final SearchMusic.Song song) {
-//        new DownloadSearchedMusic(this, song) {
-//            @Override
-//            public void onPrepare() {
-//                showProgress();
-//            }
-//
-//            @Override
-//            public void onExecuteSuccess(Void aVoid) {
-//                cancelProgress();
-//                ToastUtils.show(getString(R.string.now_download, song.getSongname()));
-//            }
-//
-//            @Override
-//            public void onExecuteFail(Exception e) {
-//                cancelProgress();
-//                ToastUtils.show(R.string.unable_to_download);
-//            }
-//        }.execute();
+    private void download(final SearchMusic.Song song, boolean isPlayAfterDownload) {
+        CustomProgressDialog progressDialog = new CustomProgressDialog(this);
+        new DownloadSearchedMusic(this, song, isPlayAfterDownload) {
+            @Override
+            public void onPrepare() {
+                progressDialog.showProgress();
+            }
+
+            @Override
+            public void onExecuteSuccess(Void aVoid) {
+                progressDialog.cancelProgress();
+                ToastUtils.show(getString(R.string.now_download, song.getSongname()));
+            }
+
+            @Override
+            public void onExecuteFail(Exception e) {
+                progressDialog.cancelProgress();
+                ToastUtils.show(R.string.unable_to_download);
+            }
+        }.execute();
     }
 
     @Override
@@ -156,5 +176,71 @@ public class SearchMusicActivity extends AppCompatActivity {
                 ViewUtils.changeViewState(mMusicRecyclerView, tvLoading, tvLoadFail, LoadStateEnum.LOAD_FAIL);
             }
         });
+    }
+
+    public static abstract class DownloadSearchedMusic extends DownloadMusic {
+        private SearchMusic.Song mSong;
+        private boolean isPlayAfterDownload;
+
+        public DownloadSearchedMusic(Context context, SearchMusic.Song song, boolean isPlayAfterDownload) {
+            super(context);
+            mSong = song;
+            this.isPlayAfterDownload = isPlayAfterDownload;
+        }
+
+        @Override
+        protected void download() {
+            final String artist = mSong.getArtistname();
+            final String title = mSong.getSongname();
+
+            // 获取歌曲下载链接
+            HttpClient.getMusicDownloadInfo(mSong.getSongid(), new HttpCallback<DownloadInfo>() {
+                @Override
+                public void onSuccess(DownloadInfo response) {
+                    if (response == null || response.getBitrate() == null) {
+                        onFail(null);
+                        return;
+                    }
+
+                    downloadMusic(response.getBitrate().getFile_link(), artist, title, null, isPlayAfterDownload);
+                    onExecuteSuccess(null);
+                }
+
+                @Override
+                public void onFail(Exception e) {
+                    onExecuteFail(e);
+                }
+            });
+        }
+    }
+
+    public static class CustomProgressDialog {
+        private ProgressDialog progressDialog;
+        private Context context;
+
+        public CustomProgressDialog(Context context) {
+            this.context = context;
+        }
+
+        public void showProgress() {
+            showProgress(context.getString(R.string.loading));
+        }
+
+        public void showProgress(String message) {
+            if (progressDialog == null) {
+                progressDialog = new ProgressDialog(context);
+                progressDialog.setCancelable(false);
+            }
+            progressDialog.setMessage(message);
+            if (!progressDialog.isShowing()) {
+                progressDialog.show();
+            }
+        }
+
+        public void cancelProgress() {
+            if (progressDialog != null && progressDialog.isShowing()) {
+                progressDialog.cancel();
+            }
+        }
     }
 }

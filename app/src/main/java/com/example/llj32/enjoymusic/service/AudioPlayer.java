@@ -1,14 +1,15 @@
 package com.example.llj32.enjoymusic.service;
 
 import android.content.Context;
-import android.content.IntentFilter;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import com.example.llj32.enjoymusic.database.PlaylistLab;
 import com.example.llj32.enjoymusic.model.Music;
+import com.example.llj32.enjoymusic.model.SearchMusic;
 import com.example.llj32.enjoymusic.preference.Preferences;
+import com.example.llj32.enjoymusic.util.MusicUtils;
 import com.example.llj32.enjoymusic.util.ToastUtils;
 
 import java.io.IOException;
@@ -19,6 +20,7 @@ import java.util.List;
  * Created by hzwangchenyan on 2018/1/26.
  */
 public class AudioPlayer {
+    private static final String TAG = "AudioPlayer";
     private static final int STATE_IDLE = 0;
     private static final int STATE_PREPARING = 1;
     private static final int STATE_PLAYING = 2;
@@ -29,7 +31,6 @@ public class AudioPlayer {
     private Context context;
     private MediaPlayer mediaPlayer;
     private Handler handler;
-    private IntentFilter noisyFilter;
     private List<Music> musicList;
     private final List<OnPlayerEventListener> listeners = new ArrayList<>();
     private int state = STATE_IDLE;
@@ -51,7 +52,6 @@ public class AudioPlayer {
 
         mediaPlayer = new MediaPlayer();
         handler = new Handler(Looper.getMainLooper());
-        noisyFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
         mediaPlayer.setOnCompletionListener(mp -> next());
         mediaPlayer.setOnPreparedListener(mp -> {
             if (isPreparing()) {
@@ -88,6 +88,19 @@ public class AudioPlayer {
         play(position);
     }
 
+    public void addAndPlay(SearchMusic.Song song) {
+        addAndPlay(song.getSongname());
+    }
+
+    public void addAndPlay(String title) {
+        Music music = MusicUtils.getMusic(context, title);
+        if (music != null) {
+            addAndPlay(music);
+        } else {
+            Log.d(TAG, "歌曲" + title + "不存在");
+        }
+    }
+
     public void play(int position) {
         if (musicList.isEmpty()) {
             return;
@@ -113,6 +126,7 @@ public class AudioPlayer {
         } catch (IOException e) {
             e.printStackTrace();
             ToastUtils.show("当前歌曲无法播放");
+            next();
         }
     }
 

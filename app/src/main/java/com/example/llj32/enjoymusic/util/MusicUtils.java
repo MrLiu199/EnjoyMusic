@@ -17,13 +17,29 @@ public class MusicUtils {
      * 扫描歌曲
      */
     @NonNull
-    public static List<Music> scanMusic(Context context) {
-        List<Music> musicList = new ArrayList<>();
-
+    public static List<Music> getMusics(Context context) {
 //        long filterSize = ParseUtils.parseLong(Preferences.getFilterSize()) * 1024;
 //        long filterTime = ParseUtils.parseLong(Preferences.getFilterTime()) * 1000;
         long filterSize = 500 * 1024;//500KB
         long filterTime = 30 * 1000;//30s
+        return searchMusics(context, SELECTION, new String[]{
+                String.valueOf(filterSize),
+                String.valueOf(filterTime)
+        });
+    }
+
+    public static Music getMusic(Context context, String title) {
+        List<Music> musicList = searchMusics(context, MediaStore.Audio.AudioColumns.TITLE + " = ?", new String[]{title});
+        if (musicList.isEmpty()) {
+            return null;
+        } else {
+            return musicList.get(0);
+        }
+    }
+
+    public static List<Music> searchMusics(Context context, String whereClause, String[] whereArgs) {
+        List<Music> musicList = new ArrayList<>();
+
         Cursor cursor = context.getContentResolver().query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 new String[]{
@@ -38,11 +54,8 @@ public class MusicUtils {
                         MediaStore.Audio.AudioColumns.SIZE,
                         MediaStore.Audio.AudioColumns.DURATION
                 },
-                SELECTION,
-                new String[]{
-                        String.valueOf(filterSize),
-                        String.valueOf(filterTime)
-                },
+                whereClause,
+                whereArgs,
                 MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
         if (cursor == null) {
             return musicList;

@@ -9,4 +9,13 @@
     <string name="search_tips">歌曲名、歌手名</string>
     <string name="unknown">未知</string>
     <string name="search_empty">未找到相关结果</string>
+    <string name="loading">努力加载中…</string>
+
+    <string name="tips">温馨提示</string>
+    <string name="download_tips">当前处于移动网络，下载将消耗较多流量，是否继续下载？</string>
+    <string name="download_tips_sure">继续下载</string>
+    <string name="setting_key_mobile_network_download">mobile_network_download</string>
+    <string name="download_success">%s下载完成</string>
+    <string name="now_download">正在下载：%s</string>
+    <string name="unable_to_download">暂时无法下载</string>
 </resources>

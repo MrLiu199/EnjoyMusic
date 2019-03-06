@@ -82,6 +82,10 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
         return position;
     }
 
+    public List<Music> getFilteredList() {
+        return mFilteredList;
+    }
+
     @Override
     public Filter getFilter() {
         return new Filter() {
