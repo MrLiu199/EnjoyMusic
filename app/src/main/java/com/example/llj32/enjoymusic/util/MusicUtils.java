@@ -1,5 +1,6 @@
 package com.example.llj32.enjoymusic.util;
 
+import android.Manifest;
 import android.content.Context;
 import android.database.Cursor;
 import android.provider.BaseColumns;
@@ -39,6 +40,9 @@ public class MusicUtils {
 
     public static List<Music> searchMusics(Context context, String whereClause, String[] whereArgs) {
         List<Music> musicList = new ArrayList<>();
+        if (!PermissionUtils.isGranted(context, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+            return musicList;
+        }
 
         Cursor cursor = context.getContentResolver().query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,

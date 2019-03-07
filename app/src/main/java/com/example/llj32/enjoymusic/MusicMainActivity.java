@@ -20,7 +20,7 @@ import com.example.llj32.enjoymusic.util.viewbind.Bind;
 import com.example.llj32.enjoymusic.util.viewbind.ViewBinder;
 
 public class MusicMainActivity extends AppCompatActivity {
-    protected PlayService playService;
+    private PlayService playService;
     private ServiceConnection serviceConnection;
 
     private boolean isLocalListShown = false;

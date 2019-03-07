@@ -1,10 +1,13 @@
 package com.example.llj32.enjoymusic.fragment;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -20,9 +23,12 @@ import com.example.llj32.enjoymusic.model.Music;
 import com.example.llj32.enjoymusic.service.AudioPlayer;
 import com.example.llj32.enjoymusic.service.OnPlayerEventListener;
 import com.example.llj32.enjoymusic.util.MusicUtils;
+import com.example.llj32.enjoymusic.util.ToastUtils;
 
 import java.io.File;
 import java.util.List;
+
+import static com.example.llj32.enjoymusic.util.PermissionUtils.isGranted;
 
 //本地音乐列表
 public class LocalMusicFragment extends Fragment implements OnPlayerEventListener {
@@ -31,6 +37,7 @@ public class LocalMusicFragment extends Fragment implements OnPlayerEventListene
     private RecyclerView mMusicRecyclerView;
     private List<Music> musicList;
     private PlaylistAdapter mPlaylistAdapter;
+    private static final int READ_EXTERNAL_STORAGE = 10;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -48,6 +55,8 @@ public class LocalMusicFragment extends Fragment implements OnPlayerEventListene
         mMusicRecyclerView = view
                 .findViewById(R.id.music_recycler_view);
         mMusicRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        reqPermission(Manifest.permission.READ_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE);
         musicList = MusicUtils.getMusics(getActivity());
         mPlaylistAdapter = new PlaylistAdapter(musicList);
         mPlaylistAdapter.setOnItemClickListener(position -> {
@@ -63,12 +72,13 @@ public class LocalMusicFragment extends Fragment implements OnPlayerEventListene
                     case 0:// 分享
                         shareMusic(music);
                         break;
-//                    case 1:// 设为铃声
+                    case 1:// 设为铃声
 //                        requestSetRingtone(music);
 //                        break;
-//                    case 2:// 查看歌曲信息
+                    case 2:// 查看歌曲信息
 //                        MusicInfoActivity.start(getContext(), music);
-//                        break;
+                        ToastUtils.show(R.string.feature_not_added_yet);
+                        break;
                     case 3:// 删除
                         deleteMusic(music);
                         break;
@@ -136,8 +146,8 @@ public class LocalMusicFragment extends Fragment implements OnPlayerEventListene
 
     private void refreshMediaFiles(Music music) {
         // 刷新媒体库
-        Intent intent =
-                new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://".concat(music.getPath())));
+        Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,
+                Uri.parse("file://".concat(music.getPath())));
         getContext().sendBroadcast(intent);
     }
 
@@ -180,6 +190,23 @@ public class LocalMusicFragment extends Fragment implements OnPlayerEventListene
     @Override
     public void onBufferingUpdate(int percent) {
 
+    }
+
+    public void reqPermission(String permission, int reqCode) {
+        if (!isGranted(getContext(), permission)) {
+            requestPermissions(new String[]{permission}, reqCode);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == READ_EXTERNAL_STORAGE) {
+            if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                ToastUtils.show(R.string.no_permission_storage);
+            }
+            return;
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override
