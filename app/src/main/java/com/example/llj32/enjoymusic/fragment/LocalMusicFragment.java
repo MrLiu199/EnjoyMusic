@@ -4,11 +4,13 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,6 +18,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.*;
+import com.example.llj32.enjoymusic.BuildConfig;
 import com.example.llj32.enjoymusic.R;
 import com.example.llj32.enjoymusic.SearchMusicActivity;
 import com.example.llj32.enjoymusic.adapter.PlaylistAdapter;
@@ -119,12 +122,16 @@ public class LocalMusicFragment extends Fragment implements OnPlayerEventListene
         File file = new File(music.getPath());
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("audio/*");
-        intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {//Nougat 24
+            FileProvider.getUriForFile(getContext(), BuildConfig.APPLICATION_ID + ".fileProvider", file);
+        } else {
+            intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+        }
         startActivity(Intent.createChooser(intent, getString(R.string.share)));
     }
 
     private void deleteMusic(final Music music) {
-        AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder dialog = new AlertDialog.Builder(getContext());
         String title = music.getTitle();
         String msg = getString(R.string.delete_music, title);
         dialog.setMessage(msg);
