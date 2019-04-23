@@ -16,4 +16,22 @@ public class MusicDbSchema {
             public static final String FILE_SIZE = "fileSize";
         }
     }
+
+    public static final class SongListTable {
+        public static final String NAME = "songLists";
+
+        public static final class Cols {
+            public static final String SONG_LIST_ID = "songListId";
+            public static final String SONG_LIST_NAME = "songListName";
+        }
+    }
+
+    public static final class SongListItemTable {
+        public static final String NAME = "songListItems";
+
+        public static final class Cols {
+            public static final String SONG_LIST_ID = "songListId";
+            public static final String ITEM_SONG_ID = "itemSongId";
+        }
+    }
 }

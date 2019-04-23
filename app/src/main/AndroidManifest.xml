@@ -16,7 +16,7 @@
         android:roundIcon="@mipmap/ic_launcher2"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MusicMainActivity">
+        <activity android:name=".activity.MusicMainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -25,6 +25,7 @@
         </activity>
 
         <service android:name=".service.PlayService" />
+
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="${applicationId}.fileProvider"
@@ -34,13 +35,18 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
+
         <receiver android:name=".receiver.DownloadReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.DOWNLOAD_COMPLETE" />
             </intent-filter>
         </receiver>
 
-        <activity android:name=".SearchMusicActivity"></activity>
+        <activity android:name=".activity.SearchMusicActivity" />
+        <activity
+            android:name=".activity.MySongListActivity"
+            android:label="我的歌单" />
+        <activity android:name=".activity.SongListDetailActivity"></activity>
     </application>
 
 </manifest>

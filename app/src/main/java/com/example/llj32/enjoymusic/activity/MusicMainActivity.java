@@ -1,4 +1,4 @@
-package com.example.llj32.enjoymusic;
+package com.example.llj32.enjoymusic.activity;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -9,17 +9,20 @@ import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import com.example.llj32.enjoymusic.R;
 import com.example.llj32.enjoymusic.executor.ControlPanel;
 import com.example.llj32.enjoymusic.fragment.LocalMusicFragment;
 import com.example.llj32.enjoymusic.fragment.PlayListFragment;
 import com.example.llj32.enjoymusic.service.AudioPlayer;
 import com.example.llj32.enjoymusic.service.PlayService;
+import com.example.llj32.enjoymusic.util.DataUtils;
 import com.example.llj32.enjoymusic.util.viewbind.Bind;
 import com.example.llj32.enjoymusic.util.viewbind.ViewBinder;
 
-public class MusicMainActivity extends AppCompatActivity {
+public class MusicMainActivity extends AppCompatActivity implements View.OnClickListener {
     private PlayService playService;
     private ServiceConnection serviceConnection;
 
@@ -88,6 +91,18 @@ public class MusicMainActivity extends AppCompatActivity {
 
     private void onServiceUnbind() {
         AudioPlayer.get().removeOnPlayEventListener(controlPanel);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.ll_my_collection:
+                startActivity(SongListDetailActivity.newIntent(this, DataUtils.MY_COLLECTION_SONGLIST));
+                break;
+            case R.id.ll_my_song_list:
+                startActivity(MySongListActivity.newIntent(this));
+                break;
+        }
     }
 
     private class PlayServiceConnection implements ServiceConnection {

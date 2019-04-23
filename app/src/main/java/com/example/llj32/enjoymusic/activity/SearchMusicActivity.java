@@ -1,4 +1,4 @@
-package com.example.llj32.enjoymusic;
+package com.example.llj32.enjoymusic.activity;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -15,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.example.llj32.enjoymusic.R;
 import com.example.llj32.enjoymusic.adapter.SearchMusicAdapter;
 import com.example.llj32.enjoymusic.executor.DownloadMusic;
 import com.example.llj32.enjoymusic.http.HttpCallback;

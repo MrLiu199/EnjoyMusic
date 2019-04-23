@@ -11,14 +11,31 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.example.llj32.enjoymusic.R;
 import com.example.llj32.enjoymusic.adapter.PlaylistAdapter;
+import com.example.llj32.enjoymusic.database.SongListLab;
 import com.example.llj32.enjoymusic.model.Music;
+import com.example.llj32.enjoymusic.model.SongList;
+import com.example.llj32.enjoymusic.model.SonglistItem;
 import com.example.llj32.enjoymusic.service.AudioPlayer;
 import com.example.llj32.enjoymusic.service.OnPlayerEventListener;
 
-//播放列表
+import java.util.List;
+
+//播放列表 | 歌单中歌曲列表
 public class PlayListFragment extends Fragment implements OnPlayerEventListener {
     private RecyclerView mMusicRecyclerView;
     private PlaylistAdapter mPlaylistAdapter;
+
+    public List<Music> mPlaylistMusics;
+    private boolean isSonglist = false;//歌单还是播放列表
+    private SongList mSonglist;
+    private List<Music> mSonglistMusics;
+
+    public static PlayListFragment newInstance(SongList songList) {
+        PlayListFragment fragment = new PlayListFragment();
+        fragment.isSonglist = true;
+        fragment.mSonglist = songList;
+        return fragment;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -30,22 +47,36 @@ public class PlayListFragment extends Fragment implements OnPlayerEventListener 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_play_list, container, false);
-        getActivity().setTitle("播放列表");
+        getActivity().setTitle(isSonglist ? mSonglist.getSongListName() : "播放列表");
 
-        mMusicRecyclerView = view
-                .findViewById(R.id.music_recycler_view);
+        mMusicRecyclerView = view.findViewById(R.id.music_recycler_view);
         mMusicRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mPlaylistAdapter = new PlaylistAdapter(AudioPlayer.get().getMusicList());
+
+        if (isSonglist) {
+            mSonglistMusics = SongListLab.get(getActivity()).getSonglistMusics(mSonglist);
+        } else {
+            mPlaylistMusics = AudioPlayer.get().getMusicList();
+        }
+        mPlaylistAdapter = new PlaylistAdapter(isSonglist ? mSonglistMusics : mPlaylistMusics);
         mPlaylistAdapter.setOnItemClickListener(position -> {
-            AudioPlayer.get().play(position);
+            if (isSonglist) {
+                AudioPlayer.get().addAndPlay(mSonglistMusics.get(position));
+            } else {
+                AudioPlayer.get().play(position);
+            }
         });
         mPlaylistAdapter.setOnMoreClickListener(position -> {
             String[] items = new String[]{"移除"};
-            Music music = AudioPlayer.get().getMusicList().get(position);
+            Music music = isSonglist ? mSonglistMusics.get(position) : mPlaylistMusics.get(position);
             AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
             dialog.setTitle(music.getTitle());
             dialog.setItems(items, (dialog1, which) -> {
-                AudioPlayer.get().delete(position);
+                if (isSonglist) {
+                    SongListLab.get(getActivity()).deleteSonglistItem(new SonglistItem(mSonglist.getSongListId(),
+                            music.getSongId()));
+                } else {
+                    AudioPlayer.get().delete(position);
+                }
                 mPlaylistAdapter.notifyDataSetChanged();
                 updateSubtitle();
             });
@@ -61,31 +92,10 @@ public class PlayListFragment extends Fragment implements OnPlayerEventListener 
     }
 
     private void updateSubtitle() {
-        int crimeCount = AudioPlayer.get().getMusicList().size();
+        int crimeCount = isSonglist ? mSonglistMusics.size() : mPlaylistMusics.size();
         String subtitle = getString(R.string.subtitle_format, crimeCount);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setSubtitle(subtitle);
     }
-
-//    @Override
-//    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-//        super.onCreateOptionsMenu(menu, inflater);
-//        inflater.inflate(R.menu.menu_search_music, menu);
-//        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-//        searchView.setMaxWidth(Integer.MAX_VALUE);
-//        searchView.onActionViewExpanded();
-//        searchView.setQueryHint(getString(R.string.search_tips));
-////        searchView.setOnQueryTextListener(this);
-//        searchView.setSubmitButtonEnabled(true);
-//        try {
-//            Field field = searchView.getClass().getDeclaredField("mGoButton");
-//            field.setAccessible(true);
-//            ImageView mGoButton = (ImageView) field.get(searchView);
-//            mGoButton.setImageResource(R.drawable.ic_menu_search);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-////        return super.onCreateOptionsMenu(menu);
-//    }
 
     @Override
     public void onChange(Music music) {

@@ -3,6 +3,7 @@ package com.example.llj32.enjoymusic.database;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.CursorWrapper;
 import android.database.sqlite.SQLiteDatabase;
 import com.example.llj32.enjoymusic.model.Music;
 
@@ -45,8 +46,8 @@ public class PlaylistLab {
         return values;
     }
 
-    public void addMusic(Music c) {
-        ContentValues values = getContentValues(c);
+    public void addMusic(Music music) {
+        ContentValues values = getContentValues(music);
 
         mDatabase.insert(MusicTable.NAME, null, values);
     }
@@ -88,7 +89,6 @@ public class PlaylistLab {
         List<Music> musics = new ArrayList<>();
 
         MusicCursorWrapper cursor = queryMusics(null, null);
-
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             musics.add(cursor.getMusic());
@@ -100,20 +100,36 @@ public class PlaylistLab {
     }
 
     public Music getMusic(String title) {
-        MusicCursorWrapper cursor = queryMusics(
+        try (MusicCursorWrapper cursor = queryMusics(
                 MusicTable.Cols.TITLE + " = ?",
                 new String[]{title}
-        );
-
-        try {
+        )) {
             if (cursor.getCount() == 0) {
                 return null;
             }
-
             cursor.moveToFirst();
             return cursor.getMusic();
-        } finally {
-            cursor.close();
+        }
+    }
+
+    public static class MusicCursorWrapper extends CursorWrapper {
+        public MusicCursorWrapper(Cursor cursor) {
+            super(cursor);
+        }
+
+        public Music getMusic() {
+            String title = getString(getColumnIndex(MusicTable.Cols.TITLE));
+            long songId = getLong(getColumnIndex(MusicTable.Cols.SONG_ID));
+            String artist = getString(getColumnIndex(MusicTable.Cols.ARTIST));
+            String album = getString(getColumnIndex(MusicTable.Cols.ALBUM));
+            long albumId = getLong(getColumnIndex(MusicTable.Cols.ALBUM_ID));
+            long duration = getLong(getColumnIndex(MusicTable.Cols.DURATION));
+            String path = getString(getColumnIndex(MusicTable.Cols.PATH));
+            String fileName = getString(getColumnIndex(MusicTable.Cols.FILE_NAME));
+            long fileSize = getLong(getColumnIndex(MusicTable.Cols.FILE_SIZE));
+
+            return new Music(title, songId, artist, album, albumId,
+                    duration, path, fileName, fileSize);
         }
     }
 }

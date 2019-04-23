@@ -6,7 +6,7 @@
     android:background="?attr/colorPrimary"
     android:fitsSystemWindows="true"
     android:orientation="vertical"
-    tools:context=".SearchMusicActivity">
+    tools:context=".activity.SearchMusicActivity">
 
     <!--<include layout="@layout/include_app_bar" />-->
 

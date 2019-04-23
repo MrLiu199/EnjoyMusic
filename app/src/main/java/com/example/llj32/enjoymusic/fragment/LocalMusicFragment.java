@@ -20,9 +20,12 @@ import android.util.Log;
 import android.view.*;
 import com.example.llj32.enjoymusic.BuildConfig;
 import com.example.llj32.enjoymusic.R;
-import com.example.llj32.enjoymusic.SearchMusicActivity;
+import com.example.llj32.enjoymusic.activity.SearchMusicActivity;
 import com.example.llj32.enjoymusic.adapter.PlaylistAdapter;
+import com.example.llj32.enjoymusic.database.SongListLab;
 import com.example.llj32.enjoymusic.model.Music;
+import com.example.llj32.enjoymusic.model.SongList;
+import com.example.llj32.enjoymusic.model.SonglistItem;
 import com.example.llj32.enjoymusic.service.AudioPlayer;
 import com.example.llj32.enjoymusic.service.OnPlayerEventListener;
 import com.example.llj32.enjoymusic.util.MusicUtils;
@@ -30,7 +33,9 @@ import com.example.llj32.enjoymusic.util.ToastUtils;
 
 import java.io.File;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import static com.example.llj32.enjoymusic.util.DataUtils.MY_COLLECTION_SONGLIST;
 import static com.example.llj32.enjoymusic.util.PermissionUtils.isGranted;
 
 //本地音乐列表
@@ -55,8 +60,7 @@ public class LocalMusicFragment extends Fragment implements OnPlayerEventListene
         getActivity().setTitle("本地音乐");
 
         mSearchView = view.findViewById(R.id.music_search_view);
-        mMusicRecyclerView = view
-                .findViewById(R.id.music_recycler_view);
+        mMusicRecyclerView = view.findViewById(R.id.music_recycler_view);
         mMusicRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         reqPermission(Manifest.permission.READ_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE);
@@ -76,11 +80,12 @@ public class LocalMusicFragment extends Fragment implements OnPlayerEventListene
                         shareMusic(music);
                         break;
                     case 1:// 收藏
-//                        requestSetRingtone(music);
-//                        break;
+                        SongListLab.get(getActivity()).addSonglistItem(new SonglistItem(MY_COLLECTION_SONGLIST.getSongListId(),
+                                music.getSongId()));
+                        break;
                     case 2:// 添加到歌单
-//                        MusicInfoActivity.start(getActivity(), music);
-                        ToastUtils.show(R.string.feature_not_added_yet);
+                        showSonglistsDialog(music);
+//                        ToastUtils.show(R.string.feature_not_added_yet);
                         break;
                     case 3:// 分享文件
                         shareMusicFile(music);
@@ -118,6 +123,28 @@ public class LocalMusicFragment extends Fragment implements OnPlayerEventListene
         return view;
     }
 
+    private void showSonglistsDialog(Music music) {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
+        dialog.setTitle("选择歌单");
+        List<SongList> songlists = SongListLab.get(getActivity()).getSonglists();
+        String[] songListNames = new String[songlists.size()];
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            songlists.stream().map(SongList::getSongListName).collect(Collectors.toList()).toArray(songListNames);
+        } else {
+            for (int i = 0; i < songlists.size(); i++) {
+                songListNames[i] = songlists.get(i).getSongListName();
+            }
+        }
+        dialog.setItems(songListNames, (dialog1, which) -> {
+            SongListLab.get(getActivity()).addSonglistItem(new SonglistItem(songlists.get(which).getSongListId(),
+                    music.getSongId()));
+        });
+        dialog.show();
+    }
+
+    /**
+     * 分享音乐文件
+     */
     private void shareMusicFile(Music music) {
         File file = new File(music.getPath());
         Intent intent = new Intent(Intent.ACTION_SEND);
@@ -129,17 +156,18 @@ public class LocalMusicFragment extends Fragment implements OnPlayerEventListene
             uri = Uri.fromFile(file);
         }
         intent.putExtra(Intent.EXTRA_STREAM, uri);
-        startActivity(Intent.createChooser(intent, getString(R.string.share)));
+        startActivity(Intent.createChooser(intent, "分享音乐文件"));
     }
 
     /**
-     * 分享音乐
+     * 分享音乐信息
      */
     private void shareMusic(Music music) {
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType("text/plain");
         shareIntent.putExtra(Intent.EXTRA_SUBJECT, "分享音乐");
-        shareIntent.putExtra(Intent.EXTRA_TEXT, String.format("这首歌#%s#挺好听哦，分享给你，希望你也喜欢~", music.getTitle()));
+        shareIntent.putExtra(Intent.EXTRA_TEXT, String.format("这首歌#%s#挺好听哦，%s唱的，分享给你，希望你也喜欢~",
+                music.getTitle(), music.getArtist()));
         getActivity().startActivity(Intent.createChooser(shareIntent, "分享音乐"));
     }
 

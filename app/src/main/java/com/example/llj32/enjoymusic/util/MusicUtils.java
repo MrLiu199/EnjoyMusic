@@ -12,7 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MusicUtils {
-    private static final String SELECTION = MediaStore.Audio.AudioColumns.SIZE + " >= ? AND " + MediaStore.Audio.AudioColumns.DURATION + " >= ?";
+    private static final String SELECTION = MediaStore.Audio.AudioColumns.SIZE + " >= ? AND " +
+            MediaStore.Audio.AudioColumns.DURATION + " >= ?";
 
     /**
      * 扫描歌曲
@@ -85,10 +86,6 @@ public class MusicUtils {
 
             Music music = new Music(title, id, artist, album, albumId,
                     duration, path, fileName, fileSize);
-//            if (++i <= 20) {
-//                // 只加载前20首的缩略图
-//                CoverLoader.get().loadThumb(music);
-//            }
             musicList.add(music);
         }
         cursor.close();
