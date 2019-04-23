@@ -75,14 +75,17 @@ public class LocalMusicFragment extends Fragment implements OnPlayerEventListene
                     case 0:// 分享
                         shareMusic(music);
                         break;
-                    case 1:// 设为铃声
+                    case 1:// 收藏
 //                        requestSetRingtone(music);
 //                        break;
-                    case 2:// 查看歌曲信息
-//                        MusicInfoActivity.start(getContext(), music);
+                    case 2:// 添加到歌单
+//                        MusicInfoActivity.start(getActivity(), music);
                         ToastUtils.show(R.string.feature_not_added_yet);
                         break;
-                    case 3:// 删除
+                    case 3:// 分享文件
+                        shareMusicFile(music);
+                        break;
+                    case 4:// 删除
                         deleteMusic(music);
                         break;
                 }
@@ -115,23 +118,33 @@ public class LocalMusicFragment extends Fragment implements OnPlayerEventListene
         return view;
     }
 
+    private void shareMusicFile(Music music) {
+        File file = new File(music.getPath());
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("audio/*");
+        Uri uri;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {//Nougat 24
+            uri = FileProvider.getUriForFile(getActivity(), BuildConfig.APPLICATION_ID + ".fileProvider", file);
+        } else {
+            uri = Uri.fromFile(file);
+        }
+        intent.putExtra(Intent.EXTRA_STREAM, uri);
+        startActivity(Intent.createChooser(intent, getString(R.string.share)));
+    }
+
     /**
      * 分享音乐
      */
     private void shareMusic(Music music) {
-        File file = new File(music.getPath());
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("audio/*");
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {//Nougat 24
-            FileProvider.getUriForFile(getContext(), BuildConfig.APPLICATION_ID + ".fileProvider", file);
-        } else {
-            intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
-        }
-        startActivity(Intent.createChooser(intent, getString(R.string.share)));
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "分享音乐");
+        shareIntent.putExtra(Intent.EXTRA_TEXT, String.format("这首歌#%s#挺好听哦，分享给你，希望你也喜欢~", music.getTitle()));
+        getActivity().startActivity(Intent.createChooser(shareIntent, "分享音乐"));
     }
 
     private void deleteMusic(final Music music) {
-        AlertDialog.Builder dialog = new AlertDialog.Builder(getContext());
+        AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
         String title = music.getTitle();
         String msg = getString(R.string.delete_music, title);
         dialog.setMessage(msg);
@@ -141,7 +154,6 @@ public class LocalMusicFragment extends Fragment implements OnPlayerEventListene
             if (file.delete()) {
                 refreshMediaFiles(music);
                 new Handler(Looper.getMainLooper()).postDelayed(this::updateMusicList, 500);
-//                updateMusicList();
                 int index;
                 if ((index = AudioPlayer.get().getMusicList().indexOf(music)) != -1) {
                     AudioPlayer.get().delete(index);
@@ -155,7 +167,7 @@ public class LocalMusicFragment extends Fragment implements OnPlayerEventListene
         // 刷新媒体库
         Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,
                 Uri.parse("file://".concat(music.getPath())));
-        getContext().sendBroadcast(intent);
+        getActivity().sendBroadcast(intent);
     }
 
     private void updateMusicList() {
@@ -200,7 +212,7 @@ public class LocalMusicFragment extends Fragment implements OnPlayerEventListene
     }
 
     public void reqPermission(String permission, int reqCode) {
-        if (!isGranted(getContext(), permission)) {
+        if (!isGranted(getActivity(), permission)) {
             requestPermissions(new String[]{permission}, reqCode);
         }
     }

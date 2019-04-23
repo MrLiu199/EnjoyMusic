@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
     <external-path
+        name="external_root_path"
+        path="/" />
+    <external-path
         name="external_enjoymusic_path"
         path="EnjoyMusic/" />
     <!-- /storage/emulated/0/Download/${applicationId}/.beta/apk-->
