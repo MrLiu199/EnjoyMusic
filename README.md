@@ -4,7 +4,7 @@
 该播放器主要参考了**波尼音乐**项目( https://github.com/wangchenyan/ponymusic )，该项目结构清晰，功能完善，非常适合学习，非常感谢作者。
 
 ### 下载
-[下载地址](https://github.com/MrLiu199/EnjoyMusic/blob/master/assets/enjoy_music-debug.apk) (最低版本：Android 4.2 Jelly Bean, API 17)
+[下载地址](https://raw.githubusercontent.com/MrLiu199/EnjoyMusic/master/assets/enjoy_music-debug.apk) (最低版本：Android 4.2 Jelly Bean, API 17)
 
 ### APP主要截图
 <img src="/assets/Screenshot_1551875303.png" alt="screenshot" title="本地音乐播放" width="135" height="230" />  <img src="/assets/Screenshot_1551876634.png" alt="screenshot" title="本地音乐搜索" width="135" height="230" /> 
