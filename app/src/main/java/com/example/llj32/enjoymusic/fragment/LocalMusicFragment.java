@@ -125,7 +125,7 @@ public class LocalMusicFragment extends Fragment implements OnPlayerEventListene
 
     private void showSonglistsDialog(Music music) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
-        dialog.setTitle("选择歌单");
+        dialog.setTitle("选择加入的歌单");
         List<SongList> songlists = SongListLab.get(getActivity()).getSonglists();
         String[] songListNames = new String[songlists.size()];
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -138,6 +138,7 @@ public class LocalMusicFragment extends Fragment implements OnPlayerEventListene
         dialog.setItems(songListNames, (dialog1, which) -> {
             SongListLab.get(getActivity()).addSonglistItem(new SonglistItem(songlists.get(which).getSongListId(),
                     music.getSongId()));
+            ToastUtils.show("添加成功");
         });
         dialog.show();
     }

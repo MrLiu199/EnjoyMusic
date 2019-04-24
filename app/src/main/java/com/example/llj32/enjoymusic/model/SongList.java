@@ -30,4 +30,12 @@ public class SongList implements Serializable {
     public void setSongListName(String songListName) {
         mSongListName = songListName;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof SongList) {
+            return this.mSongListName.equals(((SongList) obj).mSongListName);
+        }
+        return false;//super.equals(obj)
+    }
 }

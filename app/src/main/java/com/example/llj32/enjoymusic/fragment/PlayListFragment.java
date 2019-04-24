@@ -74,6 +74,7 @@ public class PlayListFragment extends Fragment implements OnPlayerEventListener 
                 if (isSonglist) {
                     SongListLab.get(getActivity()).deleteSonglistItem(new SonglistItem(mSonglist.getSongListId(),
                             music.getSongId()));
+                    mSonglistMusics.remove(position);
                 } else {
                     AudioPlayer.get().delete(position);
                 }
@@ -92,8 +93,8 @@ public class PlayListFragment extends Fragment implements OnPlayerEventListener 
     }
 
     private void updateSubtitle() {
-        int crimeCount = isSonglist ? mSonglistMusics.size() : mPlaylistMusics.size();
-        String subtitle = getString(R.string.subtitle_format, crimeCount);
+        int musicCount = isSonglist ? mSonglistMusics.size() : mPlaylistMusics.size();
+        String subtitle = getString(R.string.subtitle_format, musicCount);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setSubtitle(subtitle);
     }
 

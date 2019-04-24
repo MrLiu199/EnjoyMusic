@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -12,11 +13,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import com.example.llj32.enjoymusic.R;
+import com.example.llj32.enjoymusic.adapter.SonglistAdapter;
 import com.example.llj32.enjoymusic.database.SongListLab;
 import com.example.llj32.enjoymusic.model.SongList;
 
+import java.util.List;
+
 public class MySongListActivity extends AppCompatActivity {
     private RecyclerView rvSonglist;
+    private SonglistAdapter mSonglistAdapter;
+    private List<SongList> mSonglists;
 
     public static Intent newIntent(Context context) {
         return new Intent(context, MySongListActivity.class);
@@ -28,6 +34,12 @@ public class MySongListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_my_song_list);
 
         rvSonglist = findViewById(R.id.song_list_recycler_view);
+        rvSonglist.setLayoutManager(new LinearLayoutManager(this));
+        mSonglists = SongListLab.get(this).getSonglists();
+        mSonglistAdapter = new SonglistAdapter(mSonglists, i -> {
+            startActivity(SongListDetailActivity.newIntent(this, mSonglists.get(i)));
+        });
+        rvSonglist.setAdapter(mSonglistAdapter);
     }
 
     private void newSonglist() {
@@ -43,7 +55,12 @@ public class MySongListActivity extends AppCompatActivity {
                         })
                 .setPositiveButton(android.R.string.ok,
                         (dialog, which) -> {
-                            SongListLab.get(this).addSongList(new SongList(etSonglistName.getText().toString()));
+                            SongList songList = new SongList(etSonglistName.getText().toString());
+                            SongListLab.get(this).addSongList(songList);
+//                            mSonglists.clear();
+//                            mSonglists.addAll(SongListLab.get(this).getSonglists());
+                            mSonglists.add(songList);
+                            mSonglistAdapter.notifyDataSetChanged();
                         });
         AlertDialog alertDialog = builder.create();
         alertDialog.show();

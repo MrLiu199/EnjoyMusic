@@ -52,7 +52,7 @@ public class SongListLab {
     //添加歌单
     public void addSongList(SongList songList) {
         ContentValues values = getContentValues(songList);
-
+        values.putNull(SongListTable.Cols.SONG_LIST_ID);
         mDatabase.insert(SongListTable.NAME, null, values);
     }
 
@@ -137,7 +137,7 @@ public class SongListLab {
                 whereArgs,
                 null, // groupBy
                 null, // having
-                "DESC"  // orderBy
+                SongListTable.Cols.SONG_LIST_ID + " ASC"  // orderBy
         );
 
         return new SongListCursorWrapper(cursor);
