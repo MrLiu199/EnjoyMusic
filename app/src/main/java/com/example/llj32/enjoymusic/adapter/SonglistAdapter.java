@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.example.llj32.enjoymusic.R;
 import com.example.llj32.enjoymusic.database.SongListLab;
 import com.example.llj32.enjoymusic.model.SongList;
+import com.example.llj32.enjoymusic.util.ToastUtils;
 
 import java.util.List;
 
@@ -53,6 +54,10 @@ public class SonglistAdapter extends RecyclerView.Adapter<SonglistAdapter.ViewHo
             AlertDialog.Builder dialog = new AlertDialog.Builder(context);
             dialog.setTitle(songList.getSongListName());
             dialog.setItems(items, (dialog1, which) -> {
+                if (songList.equals(MY_COLLECTION_SONGLIST)) {
+                    ToastUtils.show("该歌单不能删除");
+                    return;
+                }
                 SongListLab.get(context).deleteSongList(songList);
                 mValues.remove(i);
                 notifyDataSetChanged();
